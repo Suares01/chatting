@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mongodb_container:
+    # This image automatically creates a replica set required for transactions
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_INITDB_DATABASE: chatting
+      INIT_WAIT_SEC: 3
+    ports:
+      - 27017:27017
+  chatting_cache:
+    image: redis
+    container_name: chatting-cache
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - '6379:6379'
+    volumes:
+      - cache:/data
+
+volumes:
+  cache:
+    driver: local
