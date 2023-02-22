@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @map("_id")
+  username   String    @unique
+  email      String    @unique
+  password   String
+  verified   Boolean   @default(false)
+  disabledAt DateTime?
+  createdAt  DateTime  @default(now())
+  chatIds    String[]
+
+  messages      Message[]
+  chats         Chat[]         @relation(fields: [chatIds], references: [id])
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Chat {
+  id        String    @id @map("_id")
+  userIds   String[]  @unique
+  startedAt DateTime?
+
+  messages Message[]
+  users    User[]    @relation(fields: [userIds], references: [id])
+
+  @@map("chats")
+}
+
+model Message {
+  id         String    @id @map("_id")
+  chatId     String
+  senderId   String
+  receiverId String
+  content    String
+  readAt     DateTime?
+  sentAt     DateTime  @default(now())
+
+  chat   Chat @relation(fields: [chatId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
+
+  @@index(receiverId)
+  @@index(senderId)
+  @@index(chatId)
+  @@map("messages")
+}
+
+model Notification {
+  id          String    @id @map("_id")
+  recipientId String
+  content     String
+  category    String
+  readAt      DateTime?
+  canceledAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  recipient User @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId])
+  @@map("notifications")
+}
