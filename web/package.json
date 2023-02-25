@@ -12,7 +12,7 @@
     "prepare": "cd .. && husky install ./web/.husky"
   },
   "lint-staged": {
-    "*.ts": [
+    "*.{ts,tsx}": [
       "npm run lint:fix",
       "npm run format"
     ]
